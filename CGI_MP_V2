@@ -1,0 +1,60 @@
+import cv2
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox, simpledialog
+
+# Compression function
+def compress_image(input_path, output_path, quality):
+    # Ensure quality is within the acceptable range
+    if quality > 100:
+        quality = 100
+    elif quality < 0:
+        quality = 0
+
+    image = cv2.imread(input_path)
+    
+    if image is None:
+        messagebox.showerror("Error", f"Could not open or find the image at {input_path}")
+        return
+
+    # Compress the image
+    cv2.imwrite(output_path, image, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
+    messagebox.showinfo("Success", f"Image saved at {output_path} with quality {quality}")
+
+# Function to select input image
+def select_input_image():
+    input_image_path.set(filedialog.askopenfilename())
+
+# Function to select output path
+def select_output_path():
+    output_image_path.set(filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=[("JPEG files", "*.jpg"), ("All files", "*.*")]))
+
+# Main application window
+root = tk.Tk()
+root.title("Image Compression Tool")
+
+input_image_path = tk.StringVar()
+output_image_path = tk.StringVar()
+
+tk.Label(root, text="Select Input Image:").grid(row=0, column=0, padx=10, pady=5)
+tk.Entry(root, textvariable=input_image_path, width=50).grid(row=0, column=1, padx=10, pady=5)
+tk.Button(root, text="Browse", command=select_input_image).grid(row=0, column=2, padx=10, pady=5)
+
+tk.Label(root, text="Select Output Path:").grid(row=1, column=0, padx=10, pady=5)
+tk.Entry(root, textvariable=output_image_path, width=50).grid(row=1, column=1, padx=10, pady=5)
+tk.Button(root, text="Browse", command=select_output_path).grid(row=1, column=2, padx=10, pady=5)
+
+tk.Label(root, text="Enter Compression Quality (0-100):").grid(row=2, column=0, padx=10, pady=5)
+quality_entry = tk.Entry(root, width=10)
+quality_entry.grid(row=2, column=1, padx=10, pady=5)
+
+def start_compression():
+    try:
+        compression_quality = int(quality_entry.get())
+        compress_image(input_image_path.get(), output_image_path.get(), compression_quality)
+    except ValueError:
+        messagebox.showerror("Error", "Please enter a valid integer between 0 and 100.")
+
+tk.Button(root, text="Compress Image", command=start_compression).grid(row=3, column=0, columnspan=3, pady=10)
+
+root.mainloop()
